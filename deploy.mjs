@@ -38,22 +38,30 @@ const main = async () => {
     ssh: selectedConfig?.ssh
   })
 
-  let stdout;
+  const S = {
+    sh: async (message) => {
+      console.log(message.stdout)
+    },
+    cd: async (path) => {
+      $.cd(path)
+      console.log(`From now your location is ${path}`)
+    },
+    ls: async (args = '') => {
+      const { stdout } = await $`ls ${args}`;
+      console.log(`ls ${args}:\n${stdout}`)
+    },
+
+  }
+
   console.log('Connect to server...')
-  $.cd('/')
-  stdout = (await $`ls`).stdout
-  console.log(stdout)
-  $.cd(`/var/www`)
-  stdout = (await $`ls`).stdout
-  console.log(stdout)
-  stdout = (await $`mkdir qwe14`).stdout
-  console.log(stdout)
-  stdout = (await $`ls`).stdout
-  console.log(stdout)
-  stdout = (await $`rm -rf qwe14`).stdout
-  console.log(stdout)
-  stdout = (await $`ls`).stdout
-  console.log(stdout)
+  await S.cd('/')
+  await S.ls()
+  await S.cd(`/var/www`)
+  await S.ls('-al')
+  await S.sh(await $`mkdir qwe14`)
+  await S.ls()
+  await S.sh(await $`rm -rf qwe14`)
+  await S.ls()
 }
 
 main().catch(console.error)
