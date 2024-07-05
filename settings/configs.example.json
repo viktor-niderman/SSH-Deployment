@@ -1,0 +1,12 @@
+[
+  {
+    "serverName": "Some pseudonym of your server",
+    "remoteUser": "userName",
+    "hostname": "0.0.0.0",
+    "port": "22 (optional)",
+    "passphrase": "secret (optional)",
+    "ssh": {
+      "IdentityFile": "/path/to/ssh/id_rsa (optional)"
+    }
+  }
+]
