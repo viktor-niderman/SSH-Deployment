@@ -38,30 +38,27 @@ const main = async () => {
     ssh: selectedConfig?.ssh
   })
 
-  const S = {
-    sh: async (message) => {
-      console.log(message.stdout)
-    },
-    cd: async (path) => {
-      $.cd(path)
-      console.log(`From now your location is ${path}`)
-    },
-    ls: async (args = '') => {
-      const { stdout } = await $`ls ${args}`;
-      console.log(`ls ${args}:\n${stdout}`)
-    },
-
+  const bash = async (command) => {
+    if (command.startsWith('cd')) {
+      $.cd(command.replace('cd', '').trim())
+      return
+    }
+    const pwdAnswer = await $`pwd`;
+    console.log(`${pwdAnswer.stdout}# ${command}`.replace('\n', ''))
+    const {stdout} = await $`${command.split(' ')}`;
+    console.log(stdout);
   }
 
   console.log('Connect to server...')
-  await S.cd('/')
-  await S.ls()
-  await S.cd(`/var/www`)
-  await S.ls('-al')
-  await S.sh(await $`mkdir qwe14`)
-  await S.ls()
-  await S.sh(await $`rm -rf qwe14`)
-  await S.ls()
+  await bash('cd /')
+  await bash('ls')
+  await bash('cd /var/www')
+  await bash('ls -al')
+  await bash('mkdir qwe14')
+  await bash('ls')
+  await bash('rm -rf qwe14')
+  await bash('ls')
+
 }
 
 main().catch(console.error)
