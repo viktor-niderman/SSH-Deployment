@@ -3,6 +3,7 @@
 import { ssh } from 'webpod'
 import { promises as fs } from 'fs'
 import inquirer from 'inquirer'
+import chalk from 'chalk'
 
 const readJsonFile = async (path) => {
   const data = await fs.readFile(path, 'utf-8')
@@ -38,14 +39,20 @@ const main = async () => {
     ssh: selectedConfig?.ssh
   })
 
+  const blueConsole = (str) => {
+    console.log(chalk.blue(str));
+  }
+
   const bash = async (command) => {
+    const pwdAnswer = await $`pwd`;
+    blueConsole(`${pwdAnswer.stdout.trim()}# ${command}`)
+
     if (command.startsWith('cd')) {
       $.cd(command.replace('cd', '').trim())
       return
     }
-    const pwdAnswer = await $`pwd`;
-    console.log(`${pwdAnswer.stdout}# ${command}`.replace('\n', ''))
-    const {stdout} = await $`${command.split(' ')}`;
+
+    const { stdout } = await $`${command.split(' ')}`;
     console.log(stdout);
   }
 
@@ -58,7 +65,6 @@ const main = async () => {
   await bash('ls')
   await bash('rm -rf qwe14')
   await bash('ls')
-
 }
 
 main().catch(console.error)
