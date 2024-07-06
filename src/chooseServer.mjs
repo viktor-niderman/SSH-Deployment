@@ -1,5 +1,6 @@
 import inquirer from 'inquirer'
 import { promises as fs } from 'fs'
+import { ssh } from 'webpod'
 
 const readJsonFile = async (path) => {
   const data = await fs.readFile(path, 'utf-8')
@@ -22,5 +23,15 @@ export default async () => {
       choices
     }
   ])
-  return configs[answers.serverIndex]
+
+  const selectedConfig = await configs[answers.serverIndex]
+
+  console.log(`Connect to server ${configs[answers.serverIndex].serverName}...`)
+  return ssh({
+    remoteUser: selectedConfig.remoteUser,
+    hostname: selectedConfig.hostname,
+    port: selectedConfig.port,
+    passphrase: selectedConfig.passphrase,
+    ssh: selectedConfig?.ssh
+  });
 }
