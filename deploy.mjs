@@ -1,21 +1,16 @@
 #!/usr/bin/env zx
 
-import chooseServer from './src/chooseServer.mjs'
-import { bash, bashList } from './src/functions.mjs'
+import { SSH } from './src/SSH.mjs'
 
 const main = async () => {
-  const $ = await chooseServer();
+  const $ = new SSH();
+  await $.init()
+  await $.runCommands();
 
-  await bashList($, [
-    'cd /',
-    'ls',
-    'cd /var/www',
-    'ls -al',
-    'mkdir qwe14',
-    'ls',
-    'rm -rf qwe14',
-    'ls',
-  ])
+
+ // await commands[0].runScript($);
 }
 
 main().catch(console.error)
+
+

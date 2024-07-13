@@ -1,17 +1,8 @@
 import inquirer from 'inquirer'
-import { promises as fs } from 'fs'
-import { ssh } from 'webpod'
-
-const readJsonFile = async (path) => {
-  const data = await fs.readFile(path, 'utf-8')
-  return JSON.parse(data)
-}
+import configs from '../settings/configs.mjs'
 
 export default async () => {
-  const configPath = 'settings/configs.json'
-  const configs = await readJsonFile(configPath)
-
-  const choices = configs.map((config, index) => ({
+  const choices = configs.filter(el => el.tags?.length > 0).map((config, index) => ({
     name: `${config.serverName} (${config.hostname})`,
     value: index
   }))
@@ -27,11 +18,5 @@ export default async () => {
   const selectedConfig = await configs[answers.serverIndex]
 
   console.log(`Connect to server ${configs[answers.serverIndex].serverName}...`)
-  return ssh({
-    remoteUser: selectedConfig.remoteUser,
-    hostname: selectedConfig.hostname,
-    port: selectedConfig.port,
-    passphrase: selectedConfig.passphrase,
-    ssh: selectedConfig?.ssh
-  });
+  return selectedConfig;
 }
