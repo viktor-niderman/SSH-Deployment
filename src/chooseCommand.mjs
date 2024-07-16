@@ -12,11 +12,14 @@ export default async (tags) => {
   })
 
 
-  const choices = Object.keys(availableCommands).map((commandName, index) => ({
+  const choices = Object.keys(availableCommands).map((commandName) => ({
     name: commandName,
     value: commandName
   }));
 
+  choices.push( {
+    name: 'Exit',
+  })
 
   const answers = await inquirer.prompt([
     {

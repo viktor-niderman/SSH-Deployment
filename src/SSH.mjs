@@ -5,42 +5,48 @@ import { ssh } from 'webpod'
 import { confirmQuestion } from './functions.mjs'
 
 const blueConsole = (str) => {
-  console.log(chalk.blue(str));
+  console.log(chalk.blue(str))
 }
 const greenConsole = (str) => {
-  console.log(chalk.green(str));
+  console.log(chalk.green(str))
 }
 
 const extractFunctionBody = (fn) => {
-  const fnStr = fn.toString();
-  const bodyMatch = fnStr.match(/{([\s\S]*)}$/);
-  return bodyMatch ? bodyMatch[1].trim() : '';
-};
+  const fnStr = fn.toString()
+  const bodyMatch = fnStr.match(/{([\s\S]*)}$/)
+  return bodyMatch ? bodyMatch[1].trim() : ''
+}
 
 export class SSH {
   init = async () => {
     this.serverConfigs = await chooseServer()
-    this.$ =  ssh({
+    this.$ = ssh({
       remoteUser: this.serverConfigs.remoteUser,
       hostname: this.serverConfigs.hostname,
       port: this.serverConfigs.port,
       passphrase: this.serverConfigs.passphrase,
-      ssh: this.serverConfigs?.ssh
-    });
+      ssh: this.serverConfigs?.ssh,
+    })
   }
 
   runCommands = async () => {
-    const command = await chooseCommand(this.serverConfigs.tags);
-    greenConsole(extractFunctionBody(command));
-    const confirm = await confirmQuestion('Do you want to execute this command?');
-    if (confirm) {
-      await command(this)
+    while (true) {
+      const command = await chooseCommand(this.serverConfigs.tags)
+      if (!command) {
+        break;
+      }
+      greenConsole(extractFunctionBody(command))
+      const confirm = await confirmQuestion(
+        'Do you want to execute this command?')
+      if (confirm) {
+        await command(this)
+      }
     }
   }
 
   getPwd = async () => {
-    const pwdAnswer = await this.$`pwd`;
-    return pwdAnswer.stdout.trim();
+    const pwdAnswer = await this.$`pwd`
+    return pwdAnswer.stdout.trim()
   }
 
   bash = async (command) => {
@@ -51,16 +57,31 @@ export class SSH {
       return
     }
 
-    const { stdout } = await this.$`${command.split(' ')}`;
+    const { stdout } = await this.$`${command.split(' ')}`
     console.log(stdout)
   }
 
   bashList = async (commandsArray) => {
     for (const command of commandsArray) {
-      await this.bash(command);
+      await this.bash(command)
     }
   }
 
+  cdToProjectFolder = async () => {
+    const folder = this.serverConfigs.pathToProject
+    if (!folder) {
+      throw 'There is no pathToProject in serverConfigs'
+    }
+    await this.$.cd(folder)
+  }
+
+  getBranchName = async () => {
+    const branch = this.serverConfigs.gitBranch;
+    if (!branch) {
+      throw 'There is no gitBranch in serverConfigs'
+    }
+    return branch;
+  }
 }
 
 
